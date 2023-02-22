@@ -1,23 +1,20 @@
 import pytest
-from selene.support.shared import browser, config
-from selene import be, have
+from selene.support import shared
+from selene import be, have, browser
+from selene.support.conditions.be import existing
+
 
 @pytest.fixture
-def open():
-    browser.open('https://google.com')
-
-@pytest.fixture
-def brauser_size(open):
-    config.browser_size = 1920, 1080
-
-@pytest.fixture
-def brauser_search(brauser_size, open):
-    browser.element('[title="Поиск"]').should(be.blank).type('yashaka/selene').press_enter()
+def open_browser():
+    shared.browser.with_(window_width=1920, window_height=1080)
 
 
-def test_google_search(brauser_search, brauser_size, open):
+def test_google_search(open_browser):
+    browser.open('https://www.google.com/search?q=yashaka%2Fselene')
     browser.element('[id="search"]').should(have.text('Selene - User-oriented Web UI browser tests in Python'))
 
 
-#def test_negative_google_search(brauser_search, brauser_size, open):
-#    browser.element('[id="search"]').should(have.text('minecraft'))
+def test_negative_google_search(open_browser):
+    browser.open('https://www.google.com/search?q=12345678234567890323456789098765432134567898')
+    browser.element('#appbar').should(have.text('Результатов: примерно 0'))
+    browser.element('#res').should(have.text(' ничего не найдено. '))
